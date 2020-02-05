@@ -6,13 +6,24 @@ import {
   CountSymbol,
   CountNum,
   TurnTitle,
-  TurnPlayer
+  TurnPlayer,
+  Player
 } from "./styles";
 import { CenterContainer } from "../styles";
 
 class Stats extends React.Component {
+  getNickname(side) {
+    const { players } = this.props;
+    const nickNames = Object.entries(players);
+    if (!players || !nickNames.length) return null;
+
+    if (nickNames[0][1] === side) return nickNames[0][0];
+    return nickNames[1][0];
+  }
+
   render() {
-    const { player } = this.props;
+    const { turn, count } = this.props;
+
     return (
       <>
         <CountContainer>
@@ -20,20 +31,22 @@ class Stats extends React.Component {
             <Piece size="60px" piece="b" />
           </CenterContainer>
           <CountSymbol>X</CountSymbol>
-          <CountNum>0</CountNum>
+          <CountNum>{count.b}</CountNum>
         </CountContainer>
-        <CenterContainer size="60%">
+        <Player color="b">{this.getNickname("b")}</Player>
+        <CenterContainer size="45%">
           <TurnTitle>
             <span>Turn</span>
-            <TurnPlayer player={player}>E</TurnPlayer>
+            <TurnPlayer player={turn}>E</TurnPlayer>
           </TurnTitle>
         </CenterContainer>
+        <Player color="r">{this.getNickname("r")}</Player>
         <CountContainer>
           <CenterContainer>
             <Piece size="60px" piece="r" />
           </CenterContainer>
           <CountSymbol>X</CountSymbol>
-          <CountNum>0</CountNum>
+          <CountNum>{count.r}</CountNum>
         </CountContainer>
       </>
     );
@@ -42,7 +55,9 @@ class Stats extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    player: state.game.activePlayer
+    players: state.game.players,
+    turn: state.game.players[state.game.turn],
+    count: state.game.count
   };
 };
 

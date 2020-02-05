@@ -1,4 +1,4 @@
-export const SET_ACTIVE_PLAYER = "SET_ACTIVE_PLAYER";
-export const GET_MOVES = "GET_MOVES";
+export const START_NEW_GAME = "START_NEW_GAME";
 export const SELECT_PIECE = "SELECT_PIECE";
 export const MOVE_PIECE = "MOVE_PIECE";
+export const JUMP_PIECE = "JUMP_PIECE";

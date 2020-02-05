@@ -5,7 +5,7 @@ import Sidebox from "./Sidebox";
 import Stats from "./Stats";
 import { FlexContainer } from "./styles";
 
-const App = () => {
+const App = React.memo(() => {
   return (
     <div>
       <Header />
@@ -18,6 +18,6 @@ const App = () => {
       </FlexContainer>
     </div>
   );
-};
+});
 
 export default App;

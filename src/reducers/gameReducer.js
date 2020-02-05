@@ -1,16 +1,36 @@
-import { SET_ACTIVE_PLAYER, SELECT_PIECE } from "../actions/types";
+import {
+  START_NEW_GAME,
+  SELECT_PIECE,
+  MOVE_PIECE,
+  JUMP_PIECE
+} from "../actions/types";
 
 const initialState = {
-  activePlayer: "+",
-  activePiece: null
+  players: {},
+  count: {},
+  turn: "",
+  mustJump: false,
+  selectedPiece: null,
+  slain: null
 };
 
 export default (state = initialState, action) => {
   switch (action.type) {
-    case SET_ACTIVE_PLAYER:
-      return { ...state, activePlayer: action.payload };
+    case START_NEW_GAME:
+    case MOVE_PIECE:
+      return { ...state, ...action.payload };
     case SELECT_PIECE:
-      return { ...state, activePiece: action.payload };
+      const slain = action.payload.jumps[0]
+        ? action.payload.jumps[0].slain
+        : null;
+      return { ...state, selectedPiece: action.payload, slain };
+    case JUMP_PIECE:
+      let newTarget = null;
+      if (action.payload.selectedPiece && action.payload.mustJump) {
+        newTarget = action.payload.selectedPiece.jumps[0].slain;
+      }
+
+      return { ...state, ...action.payload, slain: newTarget };
     default:
       return state;
   }

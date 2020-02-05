@@ -2,12 +2,12 @@ import React from "react";
 import { PieceWrapper } from "./styles";
 import Crown from "./Crown";
 
-const Piece = ({ piece, crown, size, active }) => {
+const Piece = React.memo(({ piece, size, active, king }) => {
   return (
     <PieceWrapper data-player={piece} piece={piece} size={size} active={active}>
-      <Crown player={piece} />
+      {king ? <Crown player={piece} /> : null}
     </PieceWrapper>
   );
-};
+});
 
 export default Piece;

@@ -9,6 +9,7 @@ export const Heading = styled(CenterContainer)`
   margin: 0;
   color: #f0f0f0;
   font-size: 100px;
+  font-family: BLKCHCRY, serif;
   user-select: none;
 `;
 

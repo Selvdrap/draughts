@@ -1,48 +1,71 @@
 import React from "react";
 import { connect } from "react-redux";
-import { setActivePlayer, selectPiece, movePiece } from "../../actions/index";
+import { startNewGame, selectPiece, movePiece, jumpPiece } from "../../actions";
 import { FieldWrapper } from "./styles";
 import Row from "../Row";
 
 class Field extends React.Component {
+  state = {
+    fieldStr: ""
+  };
+
   componentDidMount() {
-    this.props.setActivePlayer("r");
+    this.props.startNewGame();
+  }
+
+  shouldComponentUpdate(nextProps) {
+    const fieldStr = nextProps.field.flat().join("");
+    if (this.state.fieldStr !== fieldStr) {
+      this.setState({ fieldStr });
+      return true;
+    }
+    return false;
   }
 
   handleClick = ({ target }) => {
     const {
+      selectedPiece,
+      activePlayer,
       selectPiece,
       movePiece,
-      activePlayer,
-      activePiece,
-      moves
+      jumpPiece,
+      mustJump
     } = this.props;
 
-    if (!activePiece && target.dataset.cell) return;
+    const child = target.firstChild || target;
 
-    const parent = target.parentElement;
-    const piece = target.dataset.player;
-    if (piece) {
-      if (piece === activePlayer) {
-        selectPiece(piece, +parent.dataset.row, +parent.dataset.cell);
-      }
+    if (!target.dataset.row && !target.dataset.player && !child.dataset.player)
+      return;
+    if (!target.dataset.player && !selectedPiece && !child.dataset.player)
+      return;
+
+    if (target.dataset.player && target.dataset.player === activePlayer) {
+      const parent = target.parentElement;
+      selectPiece(+parent.dataset.row, +parent.dataset.cell);
       return;
     }
 
-    if (target.dataset.cell) {
-      moves.forEach(move => {
-        if (
-          move.row === +target.dataset.row &&
-          move.cell === +target.dataset.cell
-        ) {
-          const source = { row: activePiece.row, cell: activePiece.cell };
-          const targetCell = {
-            row: +target.dataset.row,
-            cell: +target.dataset.cell
-          };
-          movePiece(source, targetCell, activePlayer);
-        }
+    if (selectedPiece && target.dataset.row) {
+      let allow = selectedPiece.moves.some(m => {
+        return m.row === +target.dataset.row && m.cell === +target.dataset.cell;
       });
+
+      if (allow && !mustJump) {
+        movePiece(+target.dataset.row, +target.dataset.cell);
+        return;
+      }
+
+      allow = selectedPiece.jumps.some(m => {
+        return (
+          m.target.row === +target.dataset.row &&
+          m.target.cell === +target.dataset.cell
+        );
+      });
+
+      if (allow) {
+        jumpPiece(+target.dataset.row, +target.dataset.cell);
+        return;
+      }
     }
   };
 
@@ -51,7 +74,7 @@ class Field extends React.Component {
     return (
       <FieldWrapper onClick={this.handleClick}>
         {field.map((row, i) => {
-          return <Row key={i} row={row} index={i}></Row>;
+          return <Row key={`row-${i}`} row={row} index={i}></Row>;
         })}
       </FieldWrapper>
     );
@@ -59,22 +82,15 @@ class Field extends React.Component {
 }
 
 const mapStateToProps = state => {
-  let moves = [];
-  if (state.game.activePiece) {
-    const row = state.game.activePiece.row;
-    const cell = state.game.activePiece.cell;
-    moves = state.possibleMoves[row][cell];
-  }
-
   return {
     field: state.field,
-    activePlayer: state.game.activePlayer,
-    activePiece: state.game.activePiece,
-    moves
+    activePlayer: state.game.players[state.game.turn],
+    selectedPiece: state.game.selectedPiece,
+    mustJump: state.game.mustJump
   };
 };
 
 export default connect(
   mapStateToProps,
-  { setActivePlayer, selectPiece, movePiece }
+  { startNewGame, selectPiece, movePiece, jumpPiece }
 )(Field);

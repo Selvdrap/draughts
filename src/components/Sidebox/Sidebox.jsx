@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Hinge } from "./styles";
 
-const Sidebox = ({ side, children }) => {
+const Sidebox = React.memo(({ side, children }) => {
   return (
     <Box side={side}>
       <Hinge vertical="top" horizontal={side} />
@@ -9,6 +9,6 @@ const Sidebox = ({ side, children }) => {
       {children}
     </Box>
   );
-};
+});
 
 export default Sidebox;

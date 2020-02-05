@@ -13,6 +13,15 @@ const Rotating = keyframes`
   }
 `;
 
+const Lift = keyframes`
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.3);
+  }
+`;
+
 export const PieceWrapper = styled(CenterContainer)`
   position: relative;
   z-index: 10;
@@ -62,7 +71,7 @@ export const PieceWrapper = styled(CenterContainer)`
     active &&
     css`
       transform: scale(1.3);
-      animation: ${Rotating} 2s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
+      animation: ${Lift} 0.3s linear, ${Rotating} 2s cubic-bezier(0.445, 0.05, 0.55, 0.95) 0.35s infinite;
     `}
 `;
 

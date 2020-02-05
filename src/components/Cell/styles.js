@@ -24,4 +24,27 @@ export const CellWrapper = styled(CenterContainer)`
       );`
         : ""}
     `}
+
+  ${({ move }) =>
+    move &&
+    css`
+      ::after {
+        content: "";
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 255, 0, 0.2);
+      }
+    `}
+
+  ${({ active }) =>
+    active &&
+    css`
+      border: 5px solid green;
+    `}
+
+  ${({ remove }) =>
+    remove &&
+    css`
+      background: rgba(155, 0, 0, 0.8);
+    `}
 `;

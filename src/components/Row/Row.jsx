@@ -6,7 +6,7 @@ const Row = ({ row, index }) => {
   return (
     <RowWrapper>
       {row.map((piece, i) => {
-        return <Cell piece={piece} row={index} cell={i} key={i} />;
+        return <Cell piece={piece} row={index} cell={i} key={`cell-${i}`} />;
       })}
     </RowWrapper>
   );

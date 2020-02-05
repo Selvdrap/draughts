@@ -3,31 +3,63 @@ import { connect } from "react-redux";
 import { CellWrapper } from "./styles";
 import Piece from "../Piece";
 
-class Cell extends React.Component {
-  isActive = () => {
-    const { activePiece, row, cell } = this.props;
-    if (!activePiece) return false;
+const Cell = React.memo(props => {
+  const {
+    piece,
+    row,
+    cell,
+    availableForMove,
+    isSlain,
+    isKing,
+    isSelected
+  } = props;
+  const order = (row + cell) % 2 ? "odd" : "even";
 
-    return activePiece.row === row && activePiece.cell === cell;
-  };
+  return (
+    <CellWrapper
+      data-row={row}
+      data-cell={cell}
+      order={order}
+      move={availableForMove}
+      remove={isSlain}
+    >
+      {piece ? <Piece piece={piece} active={isSelected} king={isKing} /> : null}
+    </CellWrapper>
+  );
+});
 
-  render() {
-    const { piece, row, cell } = this.props;
-    const order = (row + cell) % 2 ? "odd" : "even";
+const mapStateToProps = (state, ownProps) => {
+  let availableForMove = false;
+  const { selectedPiece, slain } = state.game;
+  const isSelected = selectedPiece
+    ? selectedPiece.row === ownProps.row && selectedPiece.cell === ownProps.cell
+    : false;
+  const isSlain = slain
+    ? slain.row === ownProps.row && slain.cell === ownProps.cell
+    : false;
+  const isKing = state.game.pieces.find(
+    p => p.row === ownProps.row && p.cell === ownProps.cell && p.king
+  )
+    ? true
+    : false;
 
-    return (
-      <CellWrapper data-row={row} data-cell={cell} order={order}>
-        {piece !== "-" ? (
-          <Piece piece={piece} active={this.isActive()} />
-        ) : null}
-      </CellWrapper>
-    );
+  if (selectedPiece) {
+    if (selectedPiece.jumps.length) {
+      availableForMove = selectedPiece.jumps.some(({ target }) => {
+        return target.row === ownProps.row && target.cell === ownProps.cell;
+      });
+    } else if (selectedPiece.moves.length) {
+      availableForMove = selectedPiece.moves.some(m => {
+        return m.row === ownProps.row && m.cell === ownProps.cell;
+      });
+    }
   }
-}
 
-const mapStateToProps = state => {
   return {
-    activePiece: state.game.activePiece
+    isSelected,
+    isSlain,
+    isKing,
+    availableForMove
   };
 };
 
