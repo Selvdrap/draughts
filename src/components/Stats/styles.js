@@ -1,21 +1,21 @@
-import styled, { css, keyframes } from "styled-components";
-import { FlexContainer, CenterContainer } from "../styles";
+import styled from "styled-components";
+import { CenterContainer } from "../styles";
 
-export const CountContainer = styled(FlexContainer)`
+export const CountContainer = styled(CenterContainer)`
   height: 20%;
-  justify-content: space-around;
-  align-items: center;
+  padding: 0 35px;
   color: #f0f0f0;
+  font-size: 50px;
   text-align: center;
   user-select: none;
 `;
 
-export const CountSymbol = styled.span`
-  font-size: 40px;
+export const Count = styled.span`
+  min-width: 25%;
 `;
 
-export const CountNum = styled.span`
-  font-size: 50px;
+export const CountSymbol = styled.span`
+  margin: 0 auto;
 `;
 
 export const TurnTitle = styled(CenterContainer)`
@@ -27,6 +27,7 @@ export const TurnTitle = styled(CenterContainer)`
 export const Player = styled.div`
   max-width: 100%;
   text-align: center;
+  font-family: CaslonAntique;
   font-size: 40px;
   color: ${({ color }) => (color === "r" ? "crimson" : "royalblue")};
   text-overflow: ellipsis;
@@ -34,44 +35,11 @@ export const Player = styled.div`
   white-space: nowrap;
 `;
 
-const flipForward = keyframes`
-  0% {
-    transform: scale(1) rotateY(0);
-  }
-  25% {
-    transform: scale(1.15) rotateY(90deg);
-  }
-  50% {
-    transform: scale(1.2) rotateY(180deg);
-  }
-  75% {
-    transform: scale(1.15) rotateY(270deg);
-  }
-  100% {
-    transform: scale(1) rotateY(360deg);
-  }
-`;
-
-const flipBackward = keyframes`
-  0% {
-    transform: scale(1) rotateY(360deg);
-  }
-  25% {
-    transform: scale(1.15) rotateY(270deg);
-  }
-  50% {
-    transform: scale(1.2) rotateY(180deg);
-  }
-  75% {
-    transform: scale(1.15) rotateY(90deg);
-  }
-  100% {
-    transform: scale(1) rotateY(0);
-  }
-`;
-
 export const TurnPlayer = styled.span`
-  margin-left: 25px;
+  position: relative;
+  overflow: hidden;
+  min-width: 25%;
+  margin: 0 25px;
   background-color: #f0f0f0;
   border-radius: 50%;
   border: 2px inset rgba(0, 0, 0, 1);
@@ -80,10 +48,27 @@ export const TurnPlayer = styled.span`
   transform-origin: 50% 50%;
   transition: color 0.2s ease;
   user-select: none;
-  ${({ player }) =>
-    player &&
-    css`
-      color: ${player === "r" ? "crimson" : "royalblue"};
-      animation: ${player === "r" ? flipForward : flipBackward} 1s ease;
-    `}
+
+  ::before,
+  ::after {
+    display: block;
+    z-index: 1;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    content: attr(data-content);
+    overflow: hidden;
+    pointer-events: none;
+    transition: top 1s ease, bottom 1s ease;
+  }
+
+  ::before {
+    top: ${({player}) => player === "b" ? "0" : "-100%" };
+    color: royalblue;
+  }
+
+  ::after {
+    bottom: ${({player}) => player === "r" ? "0" : "-100%" };
+    color: crimson;
+  }
 `;

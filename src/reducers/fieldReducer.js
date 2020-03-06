@@ -5,7 +5,7 @@ export default (state = [], action) => {
     case START_NEW_GAME:
     case MOVE_PIECE:
     case JUMP_PIECE:
-      return action.payload.field;
+      return [...action.payload.field];
     default:
       return state;
   }

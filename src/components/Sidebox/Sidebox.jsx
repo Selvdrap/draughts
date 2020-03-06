@@ -1,13 +1,13 @@
 import React from "react";
-import { Box, Hinge } from "./styles";
+import { BoxWrapper, Wrapper, Hinge } from "./styles";
 
 const Sidebox = React.memo(({ side, children }) => {
   return (
-    <Box side={side}>
+    <BoxWrapper width="386px" height="712px" side={side}>
       <Hinge vertical="top" horizontal={side} />
       <Hinge vertical="bottom" horizontal={side} />
-      {children}
-    </Box>
+      <Wrapper>{children}</Wrapper>
+    </BoxWrapper>
   );
 });
 

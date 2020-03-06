@@ -10,9 +10,9 @@ export const CellWrapper = styled(CenterContainer)`
     order &&
     css`
       border: 1px solid
-        ${order === "even" ? "rgba(255, 255, 255, 0.5)" : "#f0f0f0"};
+        ${order === "odd" ? "rgba(255, 255, 255, 0.5)" : "#f0f0f0"};
 
-      ${order === "even"
+      ${order === "odd"
         ? `background: linear-gradient(
         135deg,
         #4c4c4c 0%,

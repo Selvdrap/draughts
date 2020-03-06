@@ -1,22 +1,29 @@
 import React from "react";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+
+import PrivateRoute from "./PrivateRoute";
+import Game from "./Game";
 import Header from "./Header";
-import Field from "./Field";
-import Sidebox from "./Sidebox";
-import Stats from "./Stats";
-import { FlexContainer } from "./styles";
+import Home from "./Home";
+import LoginForm from "./LoginForm";
+
+import { AppWrapper, CenterContainer } from "./styles";
 
 const App = React.memo(() => {
   return (
-    <div>
-      <Header />
-      <FlexContainer>
-        <Sidebox side="left">
-          <Stats />
-        </Sidebox>
-        <Field />
-        <Sidebox side="right" />
-      </FlexContainer>
-    </div>
+    <AppWrapper>
+      <Router>
+        <Header />
+        <CenterContainer style={{marginTop: "20px"}}>
+          <Switch>
+            {/* <Route component={LoginForm} exact path="/login" /> */}
+            {/* <PrivateRoute component={Game} path="/game/:id" /> */}
+            <Route component={Game} />
+            {/* <PrivateRoute component={Home} path="/home" /> */}
+          </Switch>
+        </CenterContainer>
+      </Router>
+    </AppWrapper>
   );
 });
 

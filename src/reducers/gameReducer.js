@@ -11,7 +11,7 @@ const initialState = {
   turn: "",
   mustJump: false,
   selectedPiece: null,
-  slain: null
+  slain: []
 };
 
 export default (state = initialState, action) => {
@@ -20,17 +20,15 @@ export default (state = initialState, action) => {
     case MOVE_PIECE:
       return { ...state, ...action.payload };
     case SELECT_PIECE:
-      const slain = action.payload.jumps[0]
-        ? action.payload.jumps[0].slain
-        : null;
+      const slain = action.payload.jumps.map(j => j.slain);
       return { ...state, selectedPiece: action.payload, slain };
     case JUMP_PIECE:
-      let newTarget = null;
+      let newTargets = [];
       if (action.payload.selectedPiece && action.payload.mustJump) {
-        newTarget = action.payload.selectedPiece.jumps[0].slain;
+        newTargets = action.payload.selectedPiece.jumps.map(j => j.slain);
       }
 
-      return { ...state, ...action.payload, slain: newTarget };
+      return { ...state, ...action.payload, slain: newTargets };
     default:
       return state;
   }

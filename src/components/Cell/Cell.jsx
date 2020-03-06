@@ -10,8 +10,8 @@ const Cell = React.memo(props => {
     cell,
     availableForMove,
     isSlain,
-    isKing,
-    isSelected
+    isSelected,
+    isKing
   } = props;
   const order = (row + cell) % 2 ? "odd" : "even";
 
@@ -34,14 +34,12 @@ const mapStateToProps = (state, ownProps) => {
   const isSelected = selectedPiece
     ? selectedPiece.row === ownProps.row && selectedPiece.cell === ownProps.cell
     : false;
-  const isSlain = slain
-    ? slain.row === ownProps.row && slain.cell === ownProps.cell
-    : false;
-  const isKing = state.game.pieces.find(
+  const isSlain = slain.some(
+    p => p.row === ownProps.row && p.cell === ownProps.cell
+  );
+  const isKing = state.game.pieces.some(
     p => p.row === ownProps.row && p.cell === ownProps.cell && p.king
-  )
-    ? true
-    : false;
+  );
 
   if (selectedPiece) {
     if (selectedPiece.jumps.length) {

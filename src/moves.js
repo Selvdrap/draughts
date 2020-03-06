@@ -3,15 +3,15 @@ class Board {
     this.players = {};
     this.count = {
       b: 0,
-      r: 0
+      r: 0,
+      gameMoves: 0
     };
 
     this.selectedPiece = null;
     this.mustJump = null;
     this.lockedPiece = null;
 
-    this.moveDirections = [[1, -1], [1, 1], [-1, -1], [-1, 1]];
-    this.jumpDirections = {
+    this.directions = {
       r: [[-1, -1], [-1, 1]],
       b: [[1, -1], [1, 1]]
     };
@@ -56,6 +56,10 @@ class Board {
       canAct = Math.max(canAct, p.jumps.length, p.moves.length);
     });
 
+    if(this.count.gameMoves >= 100) {
+      alert("Draw!");
+    }
+
     if (!this.count[this.players[this.turn]] || !canAct) {
       for (let player in this.players) {
         if (player !== this.turn) {
@@ -89,6 +93,18 @@ class Board {
 
     return this.selectedPiece;
   }
+  // Check if the cell is empty
+  isCellEmpty(row, cell) {
+    return this.field[row] && this.field[row][cell] === null;
+  }
+  // Check if the cell is an enemy to the piece
+  isCellEnemy(row, cell, player) {
+    return (
+      this.field[row] &&
+      this.field[row][cell] !== null &&
+      this.field[row][cell] !== player
+    );
+  }
 }
 
 class Piece {
@@ -111,7 +127,7 @@ class Piece {
   }
   // Moves the piece to the new place leaving the previous location empty
   executeAction(t) {
-    this.board.field[this.row][this.cell] = 0;
+    this.board.field[this.row][this.cell] = null;
     this.row = t.row;
     this.cell = t.cell;
     this.board.field[this.row][this.cell] = this.player;
@@ -128,7 +144,7 @@ class Piece {
   }
   // Removes the piece from the field
   remove() {
-    this.board.field[this.row][this.cell] = 0;
+    this.board.field[this.row][this.cell] = null;
     this.board.pieces = this.board.pieces.filter(p => {
       return p.row !== this.row || p.cell !== this.cell;
     });
@@ -144,28 +160,62 @@ class Piece {
   getPossibleJumps(player) {
     this.jumps = [];
     if (this.player === player) {
-      for (let dir of this.board.moveDirections) {
-        if (
-          this.board.field[this.row + dir[0]] &&
-          this.board.field[this.row + dir[0]][this.cell + dir[1]] &&
-          this.board.field[this.row + dir[0]][this.cell + dir[1]] !==
-            this.player
+      const length = this.board.field[0].length;
+      const directions = Object.values(this.board.directions).flat();
+
+      outer: for (let dir of directions) {
+        let rowDir = dir[0];
+        let cellDir = dir[1];
+
+        while (
+          this.row + rowDir >= 0 &&
+          this.row + rowDir < length &&
+          this.cell + cellDir >= 0 &&
+          this.cell + cellDir < length
         ) {
-          const enemy = this.board.findPiece(
-            this.row + dir[0],
-            this.cell + dir[1]
-          );
           if (
-            enemy &&
-            this.board.field[enemy.row + dir[0]] &&
-            this.board.field[enemy.row + dir[0]][enemy.cell + dir[1]] === 0
+            this.board.isCellEnemy(
+              this.row + rowDir,
+              this.cell + cellDir,
+              player
+            )
           ) {
-            this.jumps.push({
-              target: { row: enemy.row + dir[0], cell: enemy.cell + dir[1] },
-              slain: enemy
-            });
-            this.board.mustJump = true;
+            const enemy = this.board.findPiece(
+              this.row + rowDir,
+              this.cell + cellDir
+            );
+
+            const behindRow = dir[0] < 0 ? -1 : 1;
+            const behindCell = dir[1] < 0 ? -1 : 1;
+            if (
+              enemy &&
+              this.board.isCellEmpty(
+                enemy.row + behindRow,
+                enemy.cell + behindCell
+              )
+            ) {
+              this.jumps.push({
+                target: {
+                  row: enemy.row + behindRow,
+                  cell: enemy.cell + behindCell
+                },
+                slain: enemy
+              });
+              this.board.mustJump = true;
+            }
+            continue outer;
+          } else {
+            if (
+              this.king &&
+              this.board.isCellEmpty(this.row + rowDir, this.cell + cellDir)
+            ) {
+              rowDir = rowDir < 0 ? rowDir - 1 : rowDir + 1;
+              cellDir = cellDir < 0 ? cellDir - 1 : cellDir + 1;
+            } else {
+              continue outer;
+            }
           }
+          if (!this.king) continue outer;
         }
       }
     }
@@ -200,25 +250,61 @@ class Piece {
         this.board.checkGameStatus();
       }
     }
+    this.board.count.gameMoves++;
     return this.board;
   }
   // Finds all possible move options for the piece which matches current player
   getPossibleMoves(player) {
     this.moves = [];
     if (!this.board.mustJump && this.player === player) {
-      let directions = this.board.jumpDirections[
+      const length = this.board.field[0].length;
+      let directions = this.board.directions[
         this.board.players[this.board.turn]
       ];
       if (this.king) {
-        directions = this.board.moveDirections;
+        directions = Object.values(this.board.directions).flat();
       }
 
-      for (let dir of directions) {
-        if (
-          this.board.field[this.row + dir[0]] &&
-          this.board.field[this.row + dir[0]][this.cell + dir[1]] === 0
-        ) {
-          this.moves.push({ row: this.row + dir[0], cell: this.cell + dir[1] });
+      outer: for (let dir of directions) {
+        let rowDir = dir[0];
+        let cellDir = dir[1];
+
+        let emptyCell = this.board.isCellEmpty(
+          this.row + rowDir,
+          this.cell + cellDir
+        );
+
+        if (emptyCell) {
+          this.moves.push({
+            row: this.row + rowDir,
+            cell: this.cell + cellDir
+          });
+        }
+
+        if (emptyCell && this.king) {
+          while (
+            this.row + rowDir >= 0 &&
+            this.row + rowDir < length &&
+            this.cell + cellDir >= 0 &&
+            this.cell + cellDir < length
+          ) {
+            rowDir = rowDir < 0 ? rowDir - 1 : rowDir + 1;
+            cellDir = cellDir < 0 ? cellDir - 1 : cellDir + 1;
+
+            emptyCell = this.board.isCellEmpty(
+              this.row + rowDir,
+              this.cell + cellDir
+            );
+
+            if (!emptyCell) continue outer;
+
+            if (emptyCell) {
+              this.moves.push({
+                row: this.row + rowDir,
+                cell: this.cell + cellDir
+              });
+            }
+          }
         }
       }
     }
@@ -229,23 +315,24 @@ class Piece {
       this.executeAction(t);
       this.board.checkGameStatus();
     }
+    this.board.count.gameMoves++;
     return this.board;
   }
 }
 
 const initialField = [
-  ["b", 0, "b", 0, "b", 0, "b", 0],
-  [0, "b", 0, "b", 0, "b", 0, "b"],
-  ["b", 0, "b", 0, "b", 0, "b", 0],
-  [0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0],
-  [0, "r", 0, "r", 0, "r", 0, "r"],
-  ["r", 0, "r", 0, "r", 0, "r", 0],
-  [0, "r", 0, "r", 0, "r", 0, "r"]
+  [null, "b", null, "b", null, "b", null, "b"],
+  ["b", null, "b", null, "b", null, "b", null],
+  [null, "b", null, "b", null, "b", null, "b"],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  ["r", null, "r", null, "r", null, "r", null],
+  [null, "r", null, "r", null, "r", null, "r"],
+  ["r", null, "r", null, "r", null, "r", null]
 ];
 
 export const createGame = () => {
-  const players = ["Dude", "Selvdrap"];
+  const players = ["AI", "Selvdrap"];
   const board = new Board();
   board.initialize(players);
   return board;

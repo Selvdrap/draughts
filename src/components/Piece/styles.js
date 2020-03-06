@@ -4,12 +4,21 @@ import RedImg from "./img/red-piece.jpg";
 import BlueImg from "./img/blue-piece.jpg";
 import { ReactComponent as Crown } from "./img/crown.svg";
 
-const Rotating = keyframes`
+const FadeIn = keyframes`
   0% {
-    transform: scale(1.3) rotate(0deg);
+    opacity: 0;
   }
   100% {
-    transform: scale(1.3) rotate(360deg);
+    opacity: 1;
+  }
+`;
+
+const Rotating = keyframes`
+  0% {
+    transform: scale(1.2) rotate(0deg);
+  }
+  100% {
+    transform: scale(1.2) rotate(360deg);
   }
 `;
 
@@ -18,7 +27,7 @@ const Lift = keyframes`
     transform: scale(1);
   }
   100% {
-    transform: scale(1.3);
+    transform: scale(1.2);
   }
 `;
 
@@ -54,6 +63,7 @@ export const PieceWrapper = styled(CenterContainer)`
   ${({ piece }) =>
     piece &&
     css`
+      animation: ${FadeIn} 0.3s ease-in-out;
       background-image: ${piece === "r" ? `url(${RedImg})` : `url(${BlueImg})`};
       border-color: ${piece === "r"
         ? "rgba(0, 0, 0, 0.6)"
@@ -71,11 +81,13 @@ export const PieceWrapper = styled(CenterContainer)`
     active &&
     css`
       transform: scale(1.3);
-      animation: ${Lift} 0.3s linear, ${Rotating} 2s cubic-bezier(0.445, 0.05, 0.55, 0.95) 0.35s infinite;
+      animation: ${Lift} 0.35s ease,
+        ${Rotating} 2s cubic-bezier(0.445, 0.05, 0.55, 0.95) 0.35s infinite;
     `}
 `;
 
 export const CrownIcon = styled(Crown)`
+  opacity: ${({ king }) => (king ? 1 : 0)};
   ${({ size = "32px" }) =>
     size &&
     css`
